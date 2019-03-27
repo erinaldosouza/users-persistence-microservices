@@ -1,8 +1,12 @@
 package br.com.tcc.microserice.persistence.controller;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,28 +32,27 @@ public class UserPersistenceController {
 	}
 	
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void save(@RequestBody User user) {
-		this.service.save(user);		
-		System.out.println("Post request to /save in persistece service: " + user);
+	public ResponseEntity<User> save(@RequestBody User user) {
+		 user = this.service.save(user); 
+		 return ResponseEntity.status(HttpStatus.OK).body(user);				
 	}
 	
 	@GetMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void find(@PathVariable(value="id", required=true) Long id) {
-		this.service.findById(id);
+	public ResponseEntity<User> find(@PathVariable(value="id", required=true) Long id) {
+		Optional<User> opt = this.service.findById(id);
+		return ResponseEntity.status(HttpStatus.OK).body(opt.orElseGet(null));
     }
 	
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void findAll() {
-		this.service.findAll();
-		System.out.println("Post request to find all method in persistece service: ");
-
+	public ResponseEntity<Iterable<User>> findAll() {		
+		Iterable<User> users = this.service.findAll();		
+		return ResponseEntity.status(HttpStatus.OK).body(users);
 	}
 	
 	@PutMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void update(@PathVariable(value="id", required=true) Long id, @RequestBody(required=true) User user) {
-		User userBd = this.service.update(user);
-		System.out.println("Put request with id: " + id + " and body: " + user);
-		
+	public ResponseEntity<User> update(@PathVariable(value="id", required=true) Long id, @RequestBody(required=true) User user) {
+		user = this.service.update(user);
+		return ResponseEntity.status(HttpStatus.OK).body(user);		
 	} 
 	
 	@DeleteMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
@@ -57,6 +60,4 @@ public class UserPersistenceController {
 		System.out.println("Detele request with id: " + id);
 		this.service.deleteById(id);
 	}
-
-
 }
