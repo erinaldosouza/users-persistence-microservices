@@ -1,0 +1,1 @@
+CREATE SCHEMA master AUTHORIZATION postgres;
