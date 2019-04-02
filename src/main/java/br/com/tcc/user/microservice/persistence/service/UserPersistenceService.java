@@ -1,9 +1,9 @@
-package br.com.tcc.microserice.persistence.service;
+package br.com.tcc.user.microservice.persistence.service;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
-import br.com.tcc.microserice.persistence.model.impl.User;
+import br.com.tcc.user.microservice.persistence.model.impl.User;
 
 @NoRepositoryBean
 public interface UserPersistenceService extends CrudRepository<User, Long> {

@@ -1,4 +1,4 @@
-package br.com.tcc.microserice.persistence.controller;
+package br.com.tcc.user.microservice.persistence.controller;
 
 import java.util.Optional;
 
@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.tcc.microserice.persistence.model.impl.User;
-import br.com.tcc.microserice.persistence.service.UserPersistenceService;
+import br.com.tcc.user.microservice.persistence.model.impl.User;
+import br.com.tcc.user.microservice.persistence.service.UserPersistenceService;
 
 @RestController
 public class UserPersistenceController {

@@ -1,13 +1,13 @@
-package br.com.tcc.microserice.persistence.service.impl;
+package br.com.tcc.user.microservice.persistence.service.impl;
 
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.com.tcc.microserice.persistence.model.impl.User;
-import br.com.tcc.microserice.persistence.repository.UserPersistenceRepository;
-import br.com.tcc.microserice.persistence.service.UserPersistenceService;
+import br.com.tcc.user.microservice.persistence.model.impl.User;
+import br.com.tcc.user.microservice.persistence.repository.UserPersistenceRepository;
+import br.com.tcc.user.microservice.persistence.service.UserPersistenceService;
 
 @Service
 public class UserPersistenceServiceImpl implements UserPersistenceService {

@@ -1,4 +1,4 @@
-package br.com.tcc.microserice.persistence.model.impl;
+package br.com.tcc.user.microservice.persistence.model.impl;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,7 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import br.com.tcc.microserice.persistence.model.IBaseModel;
+import br.com.tcc.user.microservice.persistence.model.IBaseModel;
 
 @Entity
 @Table(name="tb_user", schema="master")

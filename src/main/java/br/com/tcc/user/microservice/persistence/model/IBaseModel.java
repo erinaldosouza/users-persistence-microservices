@@ -1,4 +1,4 @@
-package br.com.tcc.microserice.persistence.model;
+package br.com.tcc.user.microservice.persistence.model;
 
 import java.io.Serializable;
 
