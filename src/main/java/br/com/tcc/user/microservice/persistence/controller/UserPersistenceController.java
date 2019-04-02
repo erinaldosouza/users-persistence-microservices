@@ -41,7 +41,7 @@ public class UserPersistenceController {
 	@GetMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<UserWrapper> find(@PathVariable(value="id", required=true) Long id) {
 		Optional<User> opt = this.service.findById(id);
-		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(opt.orElseGet(null)));
+		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(opt.orElse(null)));
     }
 	
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
