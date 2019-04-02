@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.tcc.user.microservice.persistence.model.impl.User;
 import br.com.tcc.user.microservice.persistence.service.UserPersistenceService;
+import br.com.tcc.user.microservice.persistence.wrapper.UserWrapper;
 
 @RestController
 public class UserPersistenceController {
@@ -32,32 +33,33 @@ public class UserPersistenceController {
 	}
 	
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> save(@RequestBody User user) {
-		 user = this.service.save(user); 
-		 return ResponseEntity.status(HttpStatus.OK).body(user);				
+	public ResponseEntity<UserWrapper> save(@RequestBody User user) {
+		 user = this.service.save(user); 		 
+		 return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(user));				
 	}
 	
 	@GetMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> find(@PathVariable(value="id", required=true) Long id) {
+	public ResponseEntity<UserWrapper> find(@PathVariable(value="id", required=true) Long id) {
 		Optional<User> opt = this.service.findById(id);
-		return ResponseEntity.status(HttpStatus.OK).body(opt.orElseGet(null));
+		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(opt.orElseGet(null)));
     }
 	
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Iterable<User>> findAll() {		
+	public ResponseEntity<UserWrapper> findAll() {		
 		Iterable<User> users = this.service.findAll();		
-		return ResponseEntity.status(HttpStatus.OK).body(users);
+		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(users));
 	}
 	
 	@PutMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> update(@PathVariable(value="id", required=true) Long id, @RequestBody(required=true) User user) {
+	public ResponseEntity<UserWrapper> update(@PathVariable(value="id", required=true) Long id, @RequestBody(required=true) User user) {
 		user = this.service.update(user);
-		return ResponseEntity.status(HttpStatus.OK).body(user);		
+		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(user));		
 	} 
 	
 	@DeleteMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
-	public void delete(@PathVariable(value="id", required=true) Long id) {
+	public ResponseEntity<UserWrapper> delete(@PathVariable(value="id", required=true) Long id) {
 		System.out.println("Detele request with id: " + id);
 		this.service.deleteById(id);
+		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper("success"));
 	}
 }
