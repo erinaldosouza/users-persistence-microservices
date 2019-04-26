@@ -8,7 +8,7 @@
 		<version>2.1.3.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>br.com.tcc.microserice</groupId>
+	<groupId>br.com.tcc</groupId>
 	<artifactId>user-persistence-microservices</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>user-persistence-microservices</name>
