@@ -32,31 +32,31 @@ public class UserPersistenceController {
 		this.service = service;
 	}
 	
-	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<UserWrapper> save(@RequestBody User user) {
+	@PostMapping(value="/", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<UserWrapper> save(@RequestBody(required=true) User user) {
 		 user = this.service.save(user); 		 
 		 return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(user));				
 	}
 	
-	@GetMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value="/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<UserWrapper> find(@PathVariable(value="id", required=true) Long id) {
 		Optional<User> opt = this.service.findById(id);
 		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(opt.orElse(null)));
     }
 	
-	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value="/", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<UserWrapper> findAll() {		
 		Iterable<User> users = this.service.findAll();		
 		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(users));
 	}
 	
-	@PutMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value="/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<UserWrapper> update(@PathVariable(value="id", required=true) Long id, @RequestBody(required=true) User user) {
 		user = this.service.update(user);
 		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(user));		
 	} 
 	
-	@DeleteMapping(value="{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(value="/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<UserWrapper> delete(@PathVariable(value="id", required=true) Long id) {
 		System.out.println("Detele request with id: " + id);
 		this.service.deleteById(id);
