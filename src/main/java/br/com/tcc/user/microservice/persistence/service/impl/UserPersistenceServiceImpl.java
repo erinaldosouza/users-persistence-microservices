@@ -39,7 +39,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	public <S extends User> S save(S entity) {
 		
 		if(entity.getPhoto() != null) {
-			this.updatePhoto(entity);
+			this.setPhoto(entity);
 		}
 	
 		return this.repository.save(entity);
@@ -49,7 +49,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	public <S extends User> Iterable<S> saveAll(Iterable<S> entities) {
 		
 		entities.forEach( e -> {
-			updatePhoto(e);
+			setPhoto(e);
 		});
 		
 		return this.repository.saveAll(entities);
@@ -143,7 +143,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	 * in order to avoid errors when returning the object to service business..
 	 * @param user
 	 */
-	private void updatePhoto(User user) {
+	private void setPhoto(User user) {
 		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
 		
 		Map<String, Object> map = new HashMap<>();
@@ -171,6 +171,24 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 		user.setBase64Photo(new String(bytes));
 	}
 	
+	/**
+	 * Updates the bytes in the binary persistence service, sets the stored file id in the user object and clean the multipart resource
+	 * in order to avoid errors when returning the object to service business..
+	 * @param user
+	 */
+	private void updatePhoto(User user) {
+		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
+		
+		Map<String, Object> map = new HashMap<>();
+		map.put("file", user.getPhoto().getResource());
+		
+		Map<String, String> headersMap = getDefaultHeaders(instanceInfo);	
+
+		DocumentWrapper documentWrapper = requestHelper.doPut(instanceInfo.getHomePageUrl() + user.getIdPhoto(), map, headersMap).getBody();
+		
+		user.setIdPhoto(documentWrapper.getDocument().getId());
+		user.setPhoto(null);
+	}
 	
 	/**
 	 * Deletes the user photo from binary persistence service
