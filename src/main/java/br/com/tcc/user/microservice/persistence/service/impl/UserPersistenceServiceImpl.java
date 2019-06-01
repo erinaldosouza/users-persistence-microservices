@@ -94,6 +94,10 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
 	@Override
 	public void deleteById(Long id) {
+		Optional<User> opt = repository.findById(id);
+		if(opt.isPresent()) {
+			deletePhoto(opt.get());
+		}
 		this.repository.deleteById(id);
 	}
 
@@ -154,19 +158,30 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	}
 	
 	/**
-	 * Persiste the bytes in the binary persistence service, sets the stored file id in the user object and clean the multipart resource
-	 * in order to avoid errors when returning the object to service business..
+	 * Retrieves the user photo from binary persistence service
 	 * @param user
 	 */
 	private void getPhoto(User user) {
 		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
 		
 		Map<String, String> headersMap = getDefaultHeaders(instanceInfo);	
-		headersMap.put("api-key", instanceInfo.getMetadata().get("api-key"));
 		byte[] bytes = requestHelper.doGetBinary(instanceInfo.getHomePageUrl()+ "/img/" + user.getIdPhoto(), headersMap).getBody();
 		
 		bytes = Base64.getEncoder().encode(bytes);
 		user.setBase64Photo(new String(bytes));
+	}
+	
+	
+	/**
+	 * Deletes the user photo from binary persistence service
+	 * @param user
+	 */
+	private void deletePhoto(User user) {
+		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
+		
+		Map<String, String> headersMap = getDefaultHeaders(instanceInfo);	
+		requestHelper.doDelete(instanceInfo.getHomePageUrl() + user.getIdPhoto(), headersMap).getBody();
+
 	}
 	
 	private Map<String, String> getDefaultHeaders(InstanceInfo instanceInfo) {
