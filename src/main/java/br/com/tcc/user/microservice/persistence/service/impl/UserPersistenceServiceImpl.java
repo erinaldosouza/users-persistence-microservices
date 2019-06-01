@@ -1,5 +1,8 @@
 package br.com.tcc.user.microservice.persistence.service.impl;
 
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +26,10 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
 	private final UserPersistenceRepository repository;
 	private final EurekaClient eurekaClient;
-	private final IRequestHelper<DocumentWrapper, User> requestHelper;
+	private final IRequestHelper<DocumentWrapper> requestHelper;
 	
 	@Autowired
-	public UserPersistenceServiceImpl(UserPersistenceRepository repository, EurekaClient eurekaClient, IRequestHelper<DocumentWrapper, User> requestHelper) {
+	public UserPersistenceServiceImpl(UserPersistenceRepository repository, EurekaClient eurekaClient, IRequestHelper<DocumentWrapper> requestHelper) {
 		this.repository = repository;
 		this.eurekaClient = eurekaClient;
 		this.requestHelper = requestHelper;
@@ -44,12 +47,21 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
 	@Override
 	public <S extends User> Iterable<S> saveAll(Iterable<S> entities) {
+		
+		entities.forEach( e -> {
+			updatePhoto(e);
+		});
+		
 		return this.repository.saveAll(entities);
 	}
 
 	@Override
 	public Optional<User> findById(Long id) {
-		return this.repository.findById(id);
+		Optional<User> opt = this.repository.findById(id);
+		if(opt.isPresent()) {
+			getPhoto(opt.get());
+		}
+		return opt;
 	}
 
 	@Override
@@ -60,9 +72,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	@Override
 	public Iterable<User> findAll() {
 		Iterable<User> users = this.repository.findAll();
-		/*users.forEach(u -> {
-			
-		});*/
+		users.forEach(e -> {
+			getPhoto(e);
+		});
 		return users;
 	}
 
@@ -123,14 +135,43 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	
 	
 	/**
-	 * Persiste the bytes in the binary persistence service, sets the stored file id in the user object and clean the multipart resource
+	 * Persists the bytes in the binary persistence service, sets the stored file id in the user object and clean the multipart resource
 	 * in order to avoid errors when returning the object to service business..
 	 * @param user
 	 */
 	private void updatePhoto(User user) {
 		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
-		DocumentWrapper documentWrapper = requestHelper.doPost(instanceInfo.getHomePageUrl(), user).getBody();
+		
+		Map<String, Object> map = new HashMap<>();
+		map.put("file", user.getPhoto().getResource());
+		
+		Map<String, String> headersMap = getDefaultHeaders(instanceInfo);	
+
+		DocumentWrapper documentWrapper = requestHelper.doPost(instanceInfo.getHomePageUrl(), map, headersMap).getBody();
+		
 		user.setIdPhoto(documentWrapper.getDocument().getId());
 		user.setPhoto(null);
+	}
+	
+	/**
+	 * Persiste the bytes in the binary persistence service, sets the stored file id in the user object and clean the multipart resource
+	 * in order to avoid errors when returning the object to service business..
+	 * @param user
+	 */
+	private void getPhoto(User user) {
+		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
+		
+		Map<String, String> headersMap = getDefaultHeaders(instanceInfo);	
+		headersMap.put("api-key", instanceInfo.getMetadata().get("api-key"));
+		byte[] bytes = requestHelper.doGetBinary(instanceInfo.getHomePageUrl()+ "/img/" + user.getIdPhoto(), headersMap).getBody();
+		
+		bytes = Base64.getEncoder().encode(bytes);
+		user.setBase64Photo(new String(bytes));
+	}
+	
+	private Map<String, String> getDefaultHeaders(InstanceInfo instanceInfo) {
+		Map<String, String> headersMap = new HashMap<>();		
+		headersMap.put("api-key", instanceInfo.getMetadata().get("api-key"));
+		return headersMap;
 	}
 }

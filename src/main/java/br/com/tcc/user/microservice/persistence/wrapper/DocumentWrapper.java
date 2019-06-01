@@ -21,6 +21,8 @@ public class DocumentWrapper implements Serializable {
 	@JsonProperty("files")
 	private Iterable<DocumentTO> documents;
 	
+	private byte[] bytes;
+	
 	private String error;
 	private String message;
 	public DocumentTO getDocument() {
@@ -46,5 +48,11 @@ public class DocumentWrapper implements Serializable {
 	}
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	public byte[] getBytes() {
+		return bytes;
+	}
+	public void setBytes(byte[] bytes) {
+		this.bytes = bytes;
 	}
 }

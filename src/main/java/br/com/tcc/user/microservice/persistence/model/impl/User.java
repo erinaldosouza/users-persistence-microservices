@@ -11,10 +11,16 @@ import javax.validation.constraints.NotBlank;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import br.com.tcc.user.microservice.persistence.model.IBaseModel;
 
 @Entity
 @Table(name="tb_user", schema="master")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_EMPTY)	
 public class User implements IBaseModel<Long> {
 	
 	private static final long serialVersionUID = 4650828981000577447L;
@@ -36,6 +42,9 @@ public class User implements IBaseModel<Long> {
 	
 	@Transient
 	private MultipartFile photo;
+	
+	@Transient
+	private String base64Photo;
 
 	@Override
 	public Long getId() {
@@ -78,4 +87,13 @@ public class User implements IBaseModel<Long> {
 	public void setIdPhoto(String idPhoto) {
 		this.idPhoto = idPhoto;
 	}
+
+	public String getBase64Photo() {
+		return base64Photo;
+	}
+
+	public void setBase64Photo(String base64Photo) {
+		this.base64Photo = base64Photo;
+	}
+
 }
