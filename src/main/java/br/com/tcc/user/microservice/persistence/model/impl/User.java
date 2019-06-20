@@ -46,6 +46,13 @@ public class User implements IBaseModel<Long> {
 	@Transient
 	private String base64Photo;
 
+	public User() {
+	}
+	
+	public User(Long id) {
+		this.id = id;
+	}
+
 	@Override
 	public Long getId() {
 		return id;

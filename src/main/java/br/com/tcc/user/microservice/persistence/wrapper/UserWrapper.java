@@ -15,45 +15,68 @@ public class UserWrapper implements Serializable {
 	private static final long serialVersionUID = -4887772344155987297L;
 	
 	private User user;
+	private Long userId;
 	private Iterable<User> users;
 	
 	private String error;
 	private String message;
 
-	public UserWrapper(User user) {
-		this.user = user;
+	public UserWrapper(Long userId) {
+		this. userId = userId;
 	}
 	
-	public UserWrapper(Iterable<User> users) {
-		this.users = users;
+	public UserWrapper(User user) {
+		this.user = user;
 	}
 	
 	public UserWrapper(String message) {
 		this.message = message;
 	}
 	
+	public UserWrapper() {
+	}
+
+	public UserWrapper(Iterable<User> users) {
+		this.users = users;
+	}
+	
 	public User getUser() {
 		return user;
 	}
+	
 	public void setUser(User user) {
 		this.user = user;
 	}
+	
 	public Iterable<User> getUsers() {
 		return users;
 	}
+	
 	public void setUsers(Iterable<User> users) {
 		this.users = users;
 	}
+	
 	public String getMessage() {
 		return message;
 	}
+	
 	public void setMessage(String message) {
 		this.message = message;
 	}
+	
 	public String getError() {
 		return error;
 	}
+	
 	public void setError(String errorType) {
 		this.error = errorType;
+	}
+	
+	public Long getUserId() {
+		return userId;
+	}
+	
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 }
