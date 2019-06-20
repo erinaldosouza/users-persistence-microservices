@@ -6,14 +6,12 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,34 +34,50 @@ public class UserPersistenceController {
 	}
 	
 	@PostMapping(value="/")
-	public ResponseEntity<UserWrapper> save(@RequestBody(required=true) @Valid User user) {
+	public ResponseEntity<UserWrapper> save(@RequestPart(name="document", required=false) MultipartFile document, @Valid User user) {
 		 user = this.service.save(user); 		 
-		 return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(user.getId()));				
+		 return ResponseEntity.ok().build();				
 	}
 	
 	@GetMapping(value="/{id}")
 	public ResponseEntity<UserWrapper> find(@PathVariable(name="id", required=true) Long id) {
+		ResponseEntity<UserWrapper> response = null;
 		Optional<User> opt = this.service.findById(id);
-		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(opt.orElse(null)));
+		
+		if(opt.isPresent()) {
+			response = ResponseEntity.ok(new UserWrapper(opt.get()));
+		} else {
+			response =  ResponseEntity.noContent().build();
+		}
+		
+		return response;
     }
 	
 	@GetMapping(value="/")
-	public ResponseEntity<UserWrapper> findAll() {		
-		Iterable<User> users = this.service.findAll();		
-		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(users));
+	public ResponseEntity<UserWrapper> findAll() {
+		ResponseEntity<UserWrapper> response = null;
+		Iterable<User> users = this.service.findAll();
+		
+		if(users.iterator().hasNext()) {
+			response = ResponseEntity.ok(new UserWrapper(users));
+		} else {
+			response =  ResponseEntity.noContent().build();
+		}
+		
+		return response;
 	}
 	
 	@PutMapping(value="/{id}")
-	public ResponseEntity<UserWrapper> update(@PathVariable(name="id", required=true) Long id, @RequestPart(name="photo", required=false) MultipartFile photo, @Valid User user) {
+	public ResponseEntity<UserWrapper> update(@PathVariable(name="id", required=true) Long id, @RequestPart(name="document", required=false) MultipartFile document, @Valid User user) {
 		user.setId(id);
-		user.setPhoto(photo);
-		user = this.service.update(user);
-		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(user.getId()));		
+		user.setDocument(document);
+		this.service.update(user);
+		return ResponseEntity.ok().build();
 	} 
 	
 	@DeleteMapping(value="/{id}")
 	public ResponseEntity<UserWrapper> delete(@PathVariable(name="id", required=true) Long id) {
 		this.service.deleteById(id);
-		return ResponseEntity.status(HttpStatus.OK).body(new UserWrapper(id));
+		return ResponseEntity.ok().build();
 	}
 }
