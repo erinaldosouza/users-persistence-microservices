@@ -2,12 +2,13 @@ package br.com.tcc.user.microservice.persistence.wrapper;
 
 import java.io.Serializable;
 
+import org.springframework.core.io.Resource;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import br.com.tcc.user.microservice.persistence.to.DocumentTO;
+import br.com.tcc.user.microservice.persistence.model.impl.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_EMPTY)	
@@ -15,44 +16,57 @@ public class DocumentWrapper implements Serializable {
 	
 	private static final long serialVersionUID = 3871870545539290308L;
 	
-	@JsonProperty("file")
-	private DocumentTO document;
+	private Long userId;
 	
-	@JsonProperty("files")
-	private Iterable<DocumentTO> documents;
+	private Resource file;
 	
-	private byte[] bytes;
+	private String resourceId;
 	
-	private String error;
-	private String message;
-	public DocumentTO getDocument() {
-		return document;
+	private Integer operationCod;
+		
+	public DocumentWrapper() {
 	}
-	public void setDocument(DocumentTO document) {
-		this.document = document;
+	
+	public DocumentWrapper(User user, Integer operationCod) {
+		//this.userId = user.getId();
+		//this.file = user.getDocument().getResource();
+		this.operationCod = operationCod;
 	}
-	public Iterable<DocumentTO> getDocuments() {
-		return documents;
+	
+	public DocumentWrapper(String resourceId) {
+		this.resourceId = resourceId;
 	}
-	public void setDocuments(Iterable<DocumentTO> documents) {
-		this.documents = documents;
+
+	public String getResourceId() {
+		return resourceId;
 	}
-	public String getError() {
-		return error;
+
+	public void setResourceId(String resourceId) {
+		this.resourceId = resourceId;
 	}
-	public void setError(String error) {
-		this.error = error;
+
+	public Integer getOperationCod() {
+		return operationCod;
 	}
-	public String getMessage() {
-		return message;
+
+	
+	public void setOperationCod(Integer operationCod) {
+		this.operationCod = operationCod;
 	}
-	public void setMessage(String message) {
-		this.message = message;
+	public Long getUserId() {
+		return userId;
 	}
-	public byte[] getBytes() {
-		return bytes;
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
-	public void setBytes(byte[] bytes) {
-		this.bytes = bytes;
+
+	public Resource getFile() {
+		return file;
 	}
+
+	public void setFile(Resource file) {
+		this.file = file;
+	}
+
 }

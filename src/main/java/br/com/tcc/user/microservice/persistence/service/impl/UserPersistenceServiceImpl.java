@@ -2,19 +2,16 @@ package br.com.tcc.user.microservice.persistence.service.impl;
 
 import java.util.Optional;
 
+import org.apache.commons.lang.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.netflix.appinfo.InstanceInfo;
-import com.netflix.discovery.EurekaClient;
-
-import br.com.tcc.user.microservice.persistence.helper.IRequestHelper;
 import br.com.tcc.user.microservice.persistence.model.impl.User;
 import br.com.tcc.user.microservice.persistence.repository.UserPersistenceRepository;
 import br.com.tcc.user.microservice.persistence.service.UserPersistenceService;
-import br.com.tcc.user.microservice.persistence.wrapper.DocumentWrapper;
 
 @Service
 public class UserPersistenceServiceImpl implements UserPersistenceService {
@@ -22,45 +19,42 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	@Value("${document.persistence.service}")
 	private String documentPersistenceService;
 	
-	
 	@Value("${application.services.apikey.name}")
 	private String apikeyName;
 	
+	@Value("${app.user.persist.document.operation.routingkey}")
+	private String userDocumentOperationRoutingkey;
 
+	@Value("${app.user.persist.document.topic.exchange}")	
+ 	private String topicExchangeName;
+		
 	private final UserPersistenceRepository repository;
-	private final EurekaClient eurekaClient;
-	private final IRequestHelper<DocumentWrapper, MultipartFile> requestHelper;
+	private final RabbitTemplate rabbitTemplate;
 	
 	@Autowired
-	public UserPersistenceServiceImpl(UserPersistenceRepository repository, EurekaClient eurekaClient, IRequestHelper<DocumentWrapper, MultipartFile> requestHelper) {
+	public UserPersistenceServiceImpl(UserPersistenceRepository repository, RabbitTemplate rabbitTemplate) {
 		this.repository = repository;
-		this.eurekaClient = eurekaClient;
-		this.requestHelper = requestHelper;
+		this.rabbitTemplate = rabbitTemplate;
 	}
 
 	@Override
-	public <S extends User> S save(S entity) {
+	public User save(User user) {
+		MultipartFile document = user.getDocument();
+		user = this.repository.save(user);
+		user.setDocument(document);
 		
-		if(entity.getDocument() != null) {
-			this.saveDocument(entity);
+		if(document != null) {
+			//rabbitTemplate.convertAndSend(this.queue.getName(), new DocumentWrapper(user, 1));
 		}
 	
-		return this.repository.save(entity);
+		return user;
 	}
 
 	@Override
-	public <S extends User> Iterable<S> saveAll(Iterable<S> entities) {
-		
-		entities.forEach( e -> {
-			saveDocument(e);
-		});
-		
-		return this.repository.saveAll(entities);
-	}
-
-	@Override
-	public Optional<User> findById(Long id) {
-		return this.repository.findById(id);
+	public User findById(Long id) {
+		User user = this.repository.findById(id).orElse(null);
+		rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, "TESTE NOVOOOOO" /*new DocumentWrapper(user, 1)*/);
+		return user;
 	}
 
 	@Override
@@ -74,37 +68,29 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	}
 
 	@Override
-	public Iterable<User> findAllById(Iterable<Long> ids) {
-		return this.repository.findAllById(ids);
-	}
-
-	@Override
 	public long count() {
 		return this.repository.count();
 	}
 
 	@Override
 	public void deleteById(Long id) {
-//		Optional<User> opt = repository.findById(id);
-//		if(opt.isPresent()) {
-//			deletePhoto(opt.get());
-//		}
-		this.repository.deleteById(id);
+		Optional<User> opt = repository.findById(id);
+		if(opt.isPresent()) {
+			User user = opt.get();
+			this.repository.delete(user);
+			
+			if(StringUtils.isNotBlank(user.getIdDocument())) {
+				//rabbitTemplate.convertAndSend(this.queue.getName(), new DocumentWrapper(user.getIdDocument()));				
+			}
+		}
 	}
 
 	@Override
-	public void delete(User entity) {
-		this.repository.delete(entity);
-	}
-
-	@Override
-	public void deleteAll(Iterable<? extends User> entities) {
-		this.repository.deleteAll(entities);
-	}
-
-	@Override
-	public void deleteAll() {
-		this.repository.deleteAll();
+	public void delete(User user) {
+		this.repository.delete(user);
+		if(user.getIdDocument() != null) {
+		//	rabbitTemplate.convertAndSend(this.queue.getName(), new DocumentWrapper(user.getIdDocument()));			
+		}
 	}
 
 	@Override
@@ -116,64 +102,15 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 			userBD = optUser.get();
 			userBD.setLogin(user.getLogin());
 			userBD.setPassword(user.getPassword());
-			userBD.setDocument(user.getDocument());
-			
-			if(userBD.getDocument() != null) {
-				this.updatePhoto(userBD);
-			}
-			
 			repository.save(userBD);
+			
+			if(user.getDocument() != null) {
+				userBD.setDocument(user.getDocument());
+				//rabbitTemplate.convertAndSend(this.queue.getName(),  new DocumentWrapper(userBD, 2));			
+			}			
+			
 		}
 		
 		return userBD;
 	}
-	
-	
-	/**
-	 * Persists the bytes in the binary persistence service, sets the stored file id in the user object and clean the multipart resource
-	 * in order to avoid errors when returning the object to service business..
-	 * @param user
-	 */
-	private void saveDocument(User user) {
-		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
-			DocumentWrapper documentWrapper = requestHelper.doPost(instanceInfo.getHomePageUrl(), user.getDocument(), instanceInfo.getMetadata().get(apikeyName)).getBody();
-		
-		user.setIdDocument(documentWrapper.getDocument().getId());
-		user.setDocument(null);
-	}
-	
-	/**
-	 * Retrieves the user photo from binary persistence service
-	 * @param user
-	 */
-//	private void getPhoto(User user) {
-//		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
-//		byte[] bytes = requestHelper.doGetBinary(instanceInfo.getHomePageUrl()+ "/img/" + user.getIdDocument(), instanceInfo.getMetadata().get(apikeyName)).getBody();
-//		
-//		bytes = Base64.getEncoder().encode(bytes);
-//		user.setBase64Photo(new String(bytes));
-//	}
-	
-	/**
-	 * Updates the bytes in the binary persistence service, sets the stored file id in the user object and clean the multipart resource
-	 * in order to avoid errors when returning the object to service business..
-	 * @param user
-	 */
-	private void updatePhoto(User user) {
-		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
-		DocumentWrapper documentWrapper = requestHelper.doPut(instanceInfo.getHomePageUrl() + user.getIdDocument(), user.getDocument(), instanceInfo.getMetadata().get(apikeyName)).getBody();
-		
-		user.setIdDocument(documentWrapper.getDocument().getId());
-		user.setDocument(null);
-	}
-	
-	/**
-	 * Deletes the user photo from binary persistence service
-	 * @param user
-	 */
-//	private void deletePhoto(User user) {
-//		InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(this.documentPersistenceService, Boolean.FALSE);
-//		requestHelper.doDelete(instanceInfo.getHomePageUrl() + user.getIdDocument(), instanceInfo.getMetadata().get(apikeyName)).getBody();
-//
-//	}
 }

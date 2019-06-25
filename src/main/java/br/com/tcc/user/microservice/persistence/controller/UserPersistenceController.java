@@ -1,7 +1,5 @@
 package br.com.tcc.user.microservice.persistence.controller;
 
-import java.util.Optional;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +40,10 @@ public class UserPersistenceController {
 	@GetMapping(value="/{id}")
 	public ResponseEntity<UserWrapper> find(@PathVariable(name="id", required=true) Long id) {
 		ResponseEntity<UserWrapper> response = null;
-		Optional<User> opt = this.service.findById(id);
+		User user = this.service.findById(id);
 		
-		if(opt.isPresent()) {
-			response = ResponseEntity.ok(new UserWrapper(opt.get()));
+		if(user != null) {
+			response = ResponseEntity.ok(new UserWrapper(user));
 		} else {
 			response =  ResponseEntity.noContent().build();
 		}
