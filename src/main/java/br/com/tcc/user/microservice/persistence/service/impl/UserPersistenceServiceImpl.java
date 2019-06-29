@@ -1,17 +1,23 @@
 package br.com.tcc.user.microservice.persistence.service.impl;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import br.com.tcc.user.microservice.persistence.model.impl.User;
 import br.com.tcc.user.microservice.persistence.repository.UserPersistenceRepository;
 import br.com.tcc.user.microservice.persistence.service.UserPersistenceService;
+import br.com.tcc.user.microservice.persistence.wrapper.DocumentWrapper;
 
 @Service
 public class UserPersistenceServiceImpl implements UserPersistenceService {
@@ -44,16 +50,21 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 		user.setDocument(document);
 		
 		if(document != null) {
-			//rabbitTemplate.convertAndSend(this.queue.getName(), new DocumentWrapper(user, 1));
+			try {
+				rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user, 1));
+			} catch (AmqpException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	
 		return user;
 	}
 
+
 	@Override
 	public User findById(Long id) {
 		User user = this.repository.findById(id).orElse(null);
-		rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, "TESTE NOVOOOOO" /*new DocumentWrapper(user, 1)*/);
 		return user;
 	}
 
@@ -79,38 +90,40 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 			User user = opt.get();
 			this.repository.delete(user);
 			
-			if(StringUtils.isNotBlank(user.getIdDocument())) {
-				//rabbitTemplate.convertAndSend(this.queue.getName(), new DocumentWrapper(user.getIdDocument()));				
+			if(StringUtils.isNotBlank(user.getDocumentId())) {
+				rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user.getDocumentId(), 3));
+
 			}
 		}
 	}
 
-	@Override
-	public void delete(User user) {
-		this.repository.delete(user);
-		if(user.getIdDocument() != null) {
-		//	rabbitTemplate.convertAndSend(this.queue.getName(), new DocumentWrapper(user.getIdDocument()));			
-		}
-	}
 
 	@Override
 	public User update(User user) {
-		User userBD = null;
-		Optional<User> optUser = repository.findById(user.getId());
 		
-		if(optUser.isPresent()) {
-			userBD = optUser.get();
-			userBD.setLogin(user.getLogin());
-			userBD.setPassword(user.getPassword());
-			repository.save(userBD);
+		repository.save(user);
+		
+		if(user.getDocument() != null) {
+			try {
+				rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, toJsonValue(new DocumentWrapper(user, 2)));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}			
 			
-			if(user.getDocument() != null) {
-				userBD.setDocument(user.getDocument());
-				//rabbitTemplate.convertAndSend(this.queue.getName(),  new DocumentWrapper(userBD, 2));			
-			}			
-			
+		
+		return user;
+	}
+	
+	private String toJsonValue(Object obj) {
+		String json = null;
+		
+		try {
+			json = new ObjectMapper().writeValueAsString(obj);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
 		}
 		
-		return userBD;
+		return json;
 	}
 }

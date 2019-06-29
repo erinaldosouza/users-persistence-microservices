@@ -1,9 +1,12 @@
 package br.com.tcc.user.microservice.persistence.wrapper;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.Base64;
 
-import org.springframework.core.io.Resource;
+import org.apache.commons.io.IOUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -17,32 +20,34 @@ public class DocumentWrapper implements Serializable {
 	private static final long serialVersionUID = 3871870545539290308L;
 	
 	private Long userId;
-	
-	private Resource file;
-	
-	private String resourceId;
+		
+	private String documentId;
 	
 	private Integer operationCod;
-		
+	
+	private byte[] bytes;
+			
 	public DocumentWrapper() {
 	}
+
 	
-	public DocumentWrapper(User user, Integer operationCod) {
-		//this.userId = user.getId();
-		//this.file = user.getDocument().getResource();
+	public DocumentWrapper(User user, Integer operationCod) throws IOException {
+		this.userId = user.getId();
+		this.bytes = Base64.getEncoder().encode(IOUtils.toByteArray(user.getDocument().getInputStream()));
 		this.operationCod = operationCod;
 	}
 	
-	public DocumentWrapper(String resourceId) {
-		this.resourceId = resourceId;
+	public DocumentWrapper(String documentId, Integer operatioCod) {
+		this.documentId = documentId;
+		this.operationCod = operatioCod;
 	}
 
-	public String getResourceId() {
-		return resourceId;
+	public String getDocumentId() {
+		return documentId;
 	}
 
-	public void setResourceId(String resourceId) {
-		this.resourceId = resourceId;
+	public void setDocumentId(String documentId) {
+		this.documentId = documentId;
 	}
 
 	public Integer getOperationCod() {
@@ -61,12 +66,12 @@ public class DocumentWrapper implements Serializable {
 		this.userId = userId;
 	}
 
-	public Resource getFile() {
-		return file;
+	public byte[] getBytes() {
+		return bytes;
 	}
 
-	public void setFile(Resource file) {
-		this.file = file;
+	public void setBytes(byte[] bytes) {
+		this.bytes = bytes;
 	}
 
 }

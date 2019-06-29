@@ -37,8 +37,8 @@ public class User implements IBaseModel<Long> {
 	@Column(name="ds_password", nullable=false)
 	private String password;
 	
-	@Column(name="id_document")
-	private String idDocument;
+	@Column(name="document_id")
+	private String documentId;
 	
 	@Transient
 	private MultipartFile document;
@@ -87,12 +87,12 @@ public class User implements IBaseModel<Long> {
 		this.base64Photo = base64Photo;
 	}
 
-	public String getIdDocument() {
-		return idDocument;
+	public String getDocumentId() {
+		return documentId;
 	}
 
-	public void setIdDocument(String idDocument) {
-		this.idDocument = idDocument;
+	public void setDocumentId(String documentId) {
+		this.documentId = documentId;
 	}
 
 	public MultipartFile getDocument() {

@@ -11,5 +11,4 @@ public interface IGenericPersistenceService <T, L>{
 	boolean existsById(L id);
 	long count();
 	void deleteById(L id);
-	void delete(T entity);
 }
