@@ -6,7 +6,6 @@ import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -25,6 +24,10 @@ public class DocumentWrapper implements Serializable {
 	
 	private Integer operationCod;
 	
+	private String filename;
+	
+	private String contentType;
+		
 	private byte[] bytes;
 			
 	public DocumentWrapper() {
@@ -35,6 +38,9 @@ public class DocumentWrapper implements Serializable {
 		this.userId = user.getId();
 		this.bytes = Base64.getEncoder().encode(IOUtils.toByteArray(user.getDocument().getInputStream()));
 		this.operationCod = operationCod;
+		this.filename = user.getDocument().getOriginalFilename();
+		this.contentType = user.getDocument().getContentType();
+		this.documentId = user.getDocumentId();
 	}
 	
 	public DocumentWrapper(String documentId, Integer operatioCod) {
@@ -72,6 +78,26 @@ public class DocumentWrapper implements Serializable {
 
 	public void setBytes(byte[] bytes) {
 		this.bytes = bytes;
+	}
+
+
+	public String getFilename() {
+		return filename;
+	}
+
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+
+
+	public String getContentType() {
+		return contentType;
+	}
+
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 
 }

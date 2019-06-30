@@ -101,29 +101,27 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	@Override
 	public User update(User user) {
 		
-		repository.save(user);
+		Optional<User> opt = repository.findById(user.getId());
+		User userBD = null;
 		
-		if(user.getDocument() != null) {
-			try {
-				rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, toJsonValue(new DocumentWrapper(user, 2)));
-			} catch (Exception e) {
-				e.printStackTrace();
+		if((userBD = opt.orElse(null)) != null) {
+			userBD.setLogin(user.getLogin());
+			userBD.setPassword(user.getPassword());
+				
+			repository.save(userBD);
+		
+			if(user.getDocument() != null) {
+				user.setDocumentId(userBD.getDocumentId());
+				try {
+					rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user, 2));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}			
 			
 		
 		return user;
 	}
-	
-	private String toJsonValue(Object obj) {
-		String json = null;
-		
-		try {
-			json = new ObjectMapper().writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		
-		return json;
-	}
+
 }
