@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import br.com.tcc.user.microservice.persistence.model.IBaseModel;
 
 @Entity
-@Table(name="tb_user")
+@Table(name="tb_user", schema="public")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_EMPTY)
 public class User implements IBaseModel<Long> {
