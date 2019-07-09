@@ -18,9 +18,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import br.com.tcc.user.microservice.persistence.model.IBaseModel;
 
 @Entity
-@Table(name="tb_user", schema="master")
+@Table(name="tb_user")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(Include.NON_EMPTY)	
+@JsonInclude(Include.NON_EMPTY)
 public class User implements IBaseModel<Long> {
 	
 	private static final long serialVersionUID = 4650828981000577447L;
@@ -28,6 +28,14 @@ public class User implements IBaseModel<Long> {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
+	
+	@NotBlank
+	@Column(name="ds_name", nullable=false)
+	private String name;
+	
+	@NotBlank
+	@Column(name="ds_last_name", nullable=false)
+	private String lastName;
 	
 	@NotBlank
 	@Column(name="ds_login", nullable=false, unique=true)
@@ -103,4 +111,19 @@ public class User implements IBaseModel<Long> {
 		this.document = document;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 }

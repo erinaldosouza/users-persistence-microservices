@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,8 +34,8 @@ public class UserPersistenceController {
 	
 	@PostMapping(value="/")
 	public ResponseEntity<UserWrapper> save(@RequestPart(name="document", required=false) MultipartFile document, @Valid User user) {
-		 user = this.service.save(user); 		 
-		 return ResponseEntity.ok().build();				
+		 user = this.service.save(user);	 
+		 return ResponseEntity.status(HttpStatus.CREATED).build();				
 	}
 	
 	@GetMapping(value="/{id}")
