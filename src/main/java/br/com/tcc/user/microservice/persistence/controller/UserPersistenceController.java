@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,7 @@ import br.com.tcc.user.microservice.persistence.service.UserPersistenceService;
 import br.com.tcc.user.microservice.persistence.wrapper.UserWrapper;
 
 @RestController
+@RequestMapping(value="api/user")
 public class UserPersistenceController {
 
 	private final UserPersistenceService service;	
@@ -32,13 +34,13 @@ public class UserPersistenceController {
 		this.service = service;
 	}
 	
-	@PostMapping(value="/user")
+	@PostMapping(value="v1")
 	public ResponseEntity<UserWrapper> save(@RequestPart(name="document", required=false) MultipartFile document, @Valid User user) {
 		 user = this.service.save(user);	 
 		 return ResponseEntity.status(HttpStatus.CREATED).build();				
 	}
 	
-	@GetMapping(value="/user/{id}")
+	@GetMapping(value="v1/{id}")
 	public ResponseEntity<UserWrapper> find(@PathVariable(name="id", required=true) Long id) {
 		ResponseEntity<UserWrapper> response = null;
 		User user = this.service.findById(id);
@@ -52,7 +54,7 @@ public class UserPersistenceController {
 		return response;
     }
 	
-	@GetMapping(value="/user")
+	@GetMapping(value="v1")
 	public ResponseEntity<UserWrapper> findAll() {
 		ResponseEntity<UserWrapper> response = null;
 		Iterable<User> users = this.service.findAll();
@@ -66,7 +68,7 @@ public class UserPersistenceController {
 		return response;
 	}
 	
-	@PutMapping(value="/user/{id}")
+	@PutMapping(value="v1/{id}")
 	public ResponseEntity<UserWrapper> update(@PathVariable(name="id", required=true) Long id, @RequestPart(name="document", required=false) MultipartFile document, @Valid User user) {
 		user.setId(id);
 		user.setDocument(document);
@@ -74,7 +76,7 @@ public class UserPersistenceController {
 		return ResponseEntity.ok().build();
 	} 
 	
-	@DeleteMapping(value="/user/{id}")
+	@DeleteMapping(value="v1/{id}")
 	public ResponseEntity<UserWrapper> delete(@PathVariable(name="id", required=true) Long id) {
 		this.service.deleteById(id);
 		return ResponseEntity.ok().build();
