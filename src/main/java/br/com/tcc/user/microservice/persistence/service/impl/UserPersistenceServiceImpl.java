@@ -5,15 +5,12 @@ import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import br.com.tcc.user.microservice.persistence.messaging.RabbitMQPublisher;
 import br.com.tcc.user.microservice.persistence.model.impl.User;
 import br.com.tcc.user.microservice.persistence.repository.UserPersistenceRepository;
 import br.com.tcc.user.microservice.persistence.service.UserPersistenceService;
@@ -35,12 +32,12 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
  	private String topicExchangeName;
 		
 	private final UserPersistenceRepository repository;
-	private final RabbitTemplate rabbitTemplate;
+	private final RabbitMQPublisher rabbitMQPublisher;
 	
 	@Autowired
-	public UserPersistenceServiceImpl(UserPersistenceRepository repository, RabbitTemplate rabbitTemplate) {
+	public UserPersistenceServiceImpl(UserPersistenceRepository repository, RabbitMQPublisher rabbitMQPublisher) {
 		this.repository = repository;
-		this.rabbitTemplate = rabbitTemplate;
+		this.rabbitMQPublisher = rabbitMQPublisher;
 	}
 
 	@Override
@@ -51,7 +48,8 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 		
 		if(document != null) {
 			try {
-				rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user, 1));
+				rabbitMQPublisher.sendAsyncMessage(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user, 1));
+
 			} catch (AmqpException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -91,8 +89,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 			this.repository.delete(user);
 			
 			if(StringUtils.isNotBlank(user.getDocumentId())) {
-				rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user.getDocumentId(), 3));
-
+				rabbitMQPublisher.sendAsyncMessage(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user.getDocumentId(), 3));
 			}
 		}
 	}
@@ -113,7 +110,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 			if(user.getDocument() != null) {
 				user.setDocumentId(userBD.getDocumentId());
 				try {
-					rabbitTemplate.convertAndSend(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user, 2));
+					rabbitMQPublisher.sendAsyncMessage(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user, 2));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

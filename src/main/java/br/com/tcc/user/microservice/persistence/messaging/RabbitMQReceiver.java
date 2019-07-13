@@ -1,18 +1,17 @@
-package br.com.tcc.user.microservice.persistence.configuration;
+package br.com.tcc.user.microservice.persistence.messaging;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-import br.com.tcc.user.microservice.persistence.model.impl.User;
 import br.com.tcc.user.microservice.persistence.repository.UserPersistenceRepository;
 import br.com.tcc.user.microservice.persistence.wrapper.DocumentWrapper;
 
-@Configuration
-public class RabbitMQReceiverConfiguration {
+@Component
+public class RabbitMQReceiver {
 	
 	private UserPersistenceRepository repository;
 	
-	public RabbitMQReceiverConfiguration(UserPersistenceRepository repository) {
+	public RabbitMQReceiver(UserPersistenceRepository repository) {
 		this.repository = repository;
 	}
 
@@ -27,12 +26,8 @@ public class RabbitMQReceiverConfiguration {
 
     }
 	
-	private void savedOrUpdatedDocument(DocumentWrapper message) {
-		User user = repository.findById(message.getUserId()).get();
-		user.setDocumentId(message.getDocumentId());
-		repository.save(user);	
-		System.out.println("Document saved or updated succefully: " + message);
-
+	private void savedOrUpdatedDocument(DocumentWrapper documentWrapper) {
+		repository.updateDocumentId(documentWrapper.getDocumentId(), documentWrapper.getUserId());
 	}
 	
 	private void documentDeleted(DocumentWrapper message) {

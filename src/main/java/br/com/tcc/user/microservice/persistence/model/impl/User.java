@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
@@ -21,6 +23,9 @@ import br.com.tcc.user.microservice.persistence.model.IBaseModel;
 @Table(name="tb_user", schema="public")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_EMPTY)
+@NamedQueries({
+	@NamedQuery(name="updateDocumentId", query="UPDATE User SET documentId = :documentId WHERE id = :id")
+})
 public class User implements IBaseModel<Long> {
 	
 	private static final long serialVersionUID = 4650828981000577447L;
