@@ -51,7 +51,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 				rabbitMQPublisher.sendAsyncMessage(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user, 1));
 
 			} catch (AmqpException | IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -116,8 +115,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 				}
 			}
 		}			
-			
-		
+
 		return user;
 	}
 

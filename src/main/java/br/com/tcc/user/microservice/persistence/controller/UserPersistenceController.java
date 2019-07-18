@@ -36,7 +36,7 @@ public class UserPersistenceController {
 	
 	@PostMapping(value="v1")
 	public ResponseEntity<UserWrapper> save(@RequestPart(name="document", required=false) MultipartFile document, @Valid User user) {
-		 user = this.service.save(user);	 
+		 this.service.save(user);	 
 		 return ResponseEntity.status(HttpStatus.CREATED).build();				
 	}
 	
