@@ -2,7 +2,6 @@ package br.com.tcc.user.microservice.persistence.wrapper;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 
@@ -36,11 +35,11 @@ public class DocumentWrapper implements Serializable {
 	
 	public DocumentWrapper(User user, Integer operationCod) throws IOException {
 		this.userId = user.getId();
-		this.bytes = Base64.getEncoder().encode(IOUtils.toByteArray(user.getDocument().getInputStream()));
 		this.operationCod = operationCod;
 		this.filename = user.getDocument().getOriginalFilename();
 		this.contentType = user.getDocument().getContentType();
 		this.documentId = user.getDocumentId();
+		this.bytes = IOUtils.toByteArray(user.getDocument().getInputStream());
 	}
 	
 	public DocumentWrapper(String documentId, Integer operatioCod) {

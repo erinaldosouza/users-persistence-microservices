@@ -41,7 +41,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 	}
 
 	@Override
-	public User save(User user) {
+	public void save(User user) {
 		MultipartFile document = user.getDocument();
 		user = this.repository.save(user);
 		user.setDocument(document);
@@ -50,12 +50,10 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 			try {
 				rabbitMQPublisher.sendAsyncMessage(topicExchangeName, userDocumentOperationRoutingkey, new DocumentWrapper(user, 1));
 
-			} catch (AmqpException | IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-	
-		return user;
 	}
 
 

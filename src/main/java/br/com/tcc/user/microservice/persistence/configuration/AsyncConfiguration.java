@@ -10,13 +10,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class AsyncConfiguration {
 	
 	/* taskExecutor is the default method name that spring will searches
-	 * if, for any reason it changes, the methods annoted with @Async must change to @Async("new-method-name-here")
+	 * if, for any reason it changes, the methods annotated with @Async must change to @Async("new-method-name-here")
 	 */
-	@Bean
+	@Bean(name="taskExecutor")
 	public Executor taskExecutor() {
 	       ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-	       executor.setCorePoolSize(50);
-	       executor.setMaxPoolSize(150);
+	       executor.setCorePoolSize(100);
+	       executor.setMaxPoolSize(200);
 	       executor.setThreadNamePrefix("AsynchThreadMethod-");
 	       executor.initialize();
 	       return executor;

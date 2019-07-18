@@ -15,5 +15,4 @@ public class UserPersistenceMicroservicesApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(UserPersistenceMicroservicesApplication.class, args);
 	}
-
 }

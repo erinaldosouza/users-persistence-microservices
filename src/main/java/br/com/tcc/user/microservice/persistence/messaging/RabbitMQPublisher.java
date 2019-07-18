@@ -17,7 +17,7 @@ public class RabbitMQPublisher {
     	this.rabbitTemplate = rabbitTemplate;
     }
 
-	@Async
+	@Async("taskExecutor")
 	public void sendAsyncMessage(String topicExchangeName, String  routingkey, DocumentWrapper documentWrapper) {
 		rabbitTemplate.convertAndSend(topicExchangeName, routingkey, documentWrapper);
 	}
