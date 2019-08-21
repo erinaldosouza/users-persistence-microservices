@@ -21,7 +21,7 @@ import br.com.tcc.user.microservice.persistence.service.UserPersistenceService;
 import br.com.tcc.user.microservice.persistence.wrapper.UserWrapper;
 
 @RestController
-@RequestMapping(value="api/user")
+@RequestMapping(value="api-user/v1")
 public class UserPersistenceController {
 
 	private final UserPersistenceService service;	
@@ -34,13 +34,13 @@ public class UserPersistenceController {
 		this.service = service;
 	}
 	
-	@PostMapping(value="v1")
-	public ResponseEntity<UserWrapper> save(@RequestPart(name="document", required=false) MultipartFile document, @Valid User user) {
+	@PostMapping
+	public ResponseEntity<UserWrapper> save(@Valid User user) {
 		 this.service.save(user);	 
 		 return ResponseEntity.status(HttpStatus.CREATED).build();				
 	}
 	
-	@GetMapping(value="v1/{id}")
+	@GetMapping(value="{id}")
 	public ResponseEntity<UserWrapper> find(@PathVariable(name="id", required=true) Long id) {
 		ResponseEntity<UserWrapper> response = null;
 		User user = this.service.findById(id);
@@ -54,7 +54,7 @@ public class UserPersistenceController {
 		return response;
     }
 	
-	@GetMapping(value="v1")
+	@GetMapping
 	public ResponseEntity<UserWrapper> findAll() {
 		ResponseEntity<UserWrapper> response = null;
 		Iterable<User> users = this.service.findAll();
@@ -68,7 +68,7 @@ public class UserPersistenceController {
 		return response;
 	}
 	
-	@PutMapping(value="v1/{id}")
+	@PutMapping(value="{id}")
 	public ResponseEntity<UserWrapper> update(@PathVariable(name="id", required=true) Long id, @RequestPart(name="document", required=false) MultipartFile document, @Valid User user) {
 		user.setId(id);
 		user.setDocument(document);
@@ -76,7 +76,7 @@ public class UserPersistenceController {
 		return ResponseEntity.ok().build();
 	} 
 	
-	@DeleteMapping(value="v1/{id}")
+	@DeleteMapping(value="{id}")
 	public ResponseEntity<UserWrapper> delete(@PathVariable(name="id", required=true) Long id) {
 		this.service.deleteById(id);
 		return ResponseEntity.ok().build();
